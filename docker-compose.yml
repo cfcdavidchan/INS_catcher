@@ -1,0 +1,13 @@
+version: "3"
+services:
+  ins_crawler:
+    image: python:3.9.0
+    container_name: ins_crawler-ins_crawler
+    volumes:
+      - .:/home
+    working_dir: /home
+    command: bash -c "
+      pip install -r requirements.txt&&
+      python main.py"
+    environment:
+      - PYTHONUNBUFFERED=1

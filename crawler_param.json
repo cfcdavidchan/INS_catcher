@@ -1,0 +1,8 @@
+{
+  "store_dir": "crawled_data",
+  "target_username": [
+    "ckykylie",
+    "kylie.yim"
+  ],
+  "crawl_sleep_time": 1
+}
