@@ -132,9 +132,12 @@ class instagram_crawler:
         response = requests.get(url=url, headers=self.headers)
         if response.status_code != 200:
             if retry > 0:
+                retry -= 1
+                time.sleep(self.page_sleep_time)
                 return self.request_instagram_url(url=url)
             else:
-                raise RuntimeError(f"Fail to request {url} after multi reties")
+                print(f"Fail to request {url} after multi reties")
+                return
         return json.loads(response.text)
 
     async def async_request_instagram_url(self, url: str, retry: int = 5) -> json:
@@ -142,9 +145,12 @@ class instagram_crawler:
             response = await client.get(url, headers=self.headers)
         if response.status_code != 200:
             if retry > 0:
+                retry -= 1
+                await asyncio.sleep(self.page_sleep_time)
                 return await self.async_request_instagram_url(url=url)
             else:
-                raise RuntimeError(f"Fail to request {url} after multi reties")
+                print(f"Fail to request {url} after multi reties")
+                return
         return json.loads(response.text)
 
     def main(self):
@@ -154,11 +160,14 @@ class instagram_crawler:
             url = self.base_url + urlencode(self.get_params(self.userid, next_page_hash=next_page_hash))
             print(f"Crawling {url}")
             response_json = self.request_instagram_url(url=url)
-            next_page_hash = self.parse_crawled_json(response_json)
-            count += 1
-            if not next_page_hash:
+            if response_json:
+                next_page_hash = self.parse_crawled_json(response_json)
+                count += 1
+                if not next_page_hash:
+                    break
+                time.sleep(self.page_sleep_time)
+            else:
                 break
-            time.sleep(self.page_sleep_time)
 
     async def async_main(self):
         next_page_hash = ''
@@ -167,9 +176,12 @@ class instagram_crawler:
             url = self.base_url + urlencode(self.get_params(self.userid, next_page_hash=next_page_hash))
             print(f"Crawling {url}")
             response_json = await self.async_request_instagram_url(url=url)
-            next_page_hash = await self.async_parse_crawled_json(response_json)
-            count += 1
-            if not next_page_hash:
+            if response_json:
+                next_page_hash = await self.async_parse_crawled_json(response_json)
+                count += 1
+                if not next_page_hash:
+                    break
+                await asyncio.sleep(self.page_sleep_time)
+            else:
                 break
-            await asyncio.sleep(self.page_sleep_time)
 
